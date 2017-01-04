@@ -2,6 +2,8 @@ use sdl2::render::{Renderer, Texture};
 use sdl2::rect::Rect;
 use sdl2::pixels::Color;
 
+use std::path::Path;
+
 use assets::*;
 use anim::Anim;
 
@@ -50,21 +52,10 @@ impl<'a> Entity<'a> {
             h: 64,
             dir: 0,
             img: src_img.get_image("player"),
-            anim: Some(Anim::new_with_r(Rect::new(0, 0, 32, 64),
-                                        &vec![("idle".to_owned(),
-                                               vec![Rect::new(0, 0, 32, 64),
-                                                    Rect::new(32, 0, 32, 64),
-                                                    Rect::new(64, 0, 32, 64)]),
-                                              ("move_left".to_owned(),
-                                               vec![Rect::new(0, 64, 32, 64),
-                                                    Rect::new(32, 64, 32, 64),
-                                                    Rect::new(64, 64, 32, 64)]),
-                                              ("move_right".to_owned(),
-                                               vec![Rect::new(0, 128, 32, 64),
-                                                    Rect::new(32, 128, 32, 64),
-                                                    Rect::new(64, 128, 32, 64)])])),
+            anim: Some(Anim::load_from_file(&Path::new("assets/player.anim"))),
         }
     }
+
     pub fn shuriken(src_img: &ImageS, x: i32, y: i32, dir: i8) -> Entity {
         Entity {
             m_type: EType::Shuriken,
@@ -74,10 +65,7 @@ impl<'a> Entity<'a> {
             h: 16,
             dir: dir,
             img: src_img.get_image("shuriken"),
-            anim: Some(Anim::new_with_r(Rect::new(0, 0, 16, 16),
-                                        &vec![("spin".to_owned(),
-                                               vec![Rect::new(0, 0, 16, 16),
-                                                    Rect::new(16, 0, 16, 16)])])),
+            anim: Some(Anim::load_from_file(&Path::new("assets/shuriken.anim"))),
         }
     }
 
@@ -102,15 +90,16 @@ impl<'a> Entity<'a> {
     }
 
     pub fn anim_next(&mut self) {
-
         match self.m_type {
             EType::Player => {
                 let ref mut a = self.anim.as_mut().unwrap();
 
                 if self.dir == -1 {
                     a.next_frame("move_left".to_owned());
-                } else {
+                } else if self.dir == 1 {
                     a.next_frame("move_right".to_owned());
+                } else {
+                    a.next_frame("idle".to_owned());
                 }
             }
             EType::Shuriken => {

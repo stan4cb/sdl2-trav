@@ -135,6 +135,11 @@ pub fn main() {
             player.ent.x = 800 - 16;
         }
 
+        if !player.left && !player.right {
+            //player.ent.dir = 0;
+            //player.ent.anim_next();
+        }
+
         if player.ent.y < 600 - 32 && !player.is_jumping {
             if let Some(val) = world.intersect(&player.ent.trans_rect(0, gravity)) {
                 player.ent.y = val.top() - 32;

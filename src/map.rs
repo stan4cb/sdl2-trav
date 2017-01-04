@@ -34,7 +34,8 @@ impl<'a> Map<'a> {
         }
     }
 
-    pub fn update(&mut self, event_pump: &EventPump) { // placing needs debug
+    pub fn update(&mut self, event_pump: &EventPump) {
+        // placing needs debug
         // add block
         if event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Left) && self.can_place {
             let mut x = event_pump.mouse_state().x();
@@ -57,9 +58,9 @@ impl<'a> Map<'a> {
                 }
             }
 
-            if let None = self.intersect( &Rect::new(x - 16,y - 16,32,32)) {
-                        let t_block = Entity::block(&self.img_s, x, y);
-                        self.items.push(t_block);
+            if let None = self.intersect(&Rect::new(x - 16, y - 16, 32, 32)) {
+                let t_block = Entity::block(&self.img_s, x, y);
+                self.items.push(t_block);
             }
 
             self.can_place = false;
