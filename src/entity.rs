@@ -1,5 +1,6 @@
 use sdl2::render::{Renderer, Texture};
-use sdl2::rect::{Rect/*, Point*/};
+use sdl2::rect::Rect;
+use sdl2::pixels::Color;
 
 use assets::*;
 use anim::Anim;
@@ -22,12 +23,12 @@ pub struct Entity<'a> {
     pub h: u32,
     pub dir: i8,
     img: Option<&'a Texture>,
-    
+
     pub anim: Option<Anim>,
 }
 
 impl<'a> Entity<'a> {
-    pub fn new(t: EType, img: Option<&Texture>, x: i32, y: i32, w: u32, h: u32) -> Entity {
+    pub fn place_holder(t: EType, img: Option<&Texture>, x: i32, y: i32, w: u32, h: u32) -> Entity {
         Entity {
             m_type: t,
             x: x,
@@ -49,7 +50,19 @@ impl<'a> Entity<'a> {
             h: 64,
             dir: 0,
             img: src_img.get_image("player"),
-            anim: Some(Anim::new(3)),
+            anim: Some(Anim::new_with_r(Rect::new(0, 0, 32, 64),
+                                        &vec![("idle".to_owned(),
+                                               vec![Rect::new(0, 0, 32, 64),
+                                                    Rect::new(32, 0, 32, 64),
+                                                    Rect::new(64, 0, 32, 64)]),
+                                              ("move_left".to_owned(),
+                                               vec![Rect::new(0, 64, 32, 64),
+                                                    Rect::new(32, 64, 32, 64),
+                                                    Rect::new(64, 64, 32, 64)]),
+                                              ("move_right".to_owned(),
+                                               vec![Rect::new(0, 128, 32, 64),
+                                                    Rect::new(32, 128, 32, 64),
+                                                    Rect::new(64, 128, 32, 64)])])),
         }
     }
     pub fn shuriken(src_img: &ImageS, x: i32, y: i32, dir: i8) -> Entity {
@@ -61,7 +74,10 @@ impl<'a> Entity<'a> {
             h: 16,
             dir: dir,
             img: src_img.get_image("shuriken"),
-            anim: None,
+            anim: Some(Anim::new_with_r(Rect::new(0, 0, 16, 16),
+                                        &vec![("spin".to_owned(),
+                                               vec![Rect::new(0, 0, 16, 16),
+                                                    Rect::new(16, 0, 16, 16)])])),
         }
     }
 
@@ -79,37 +95,30 @@ impl<'a> Entity<'a> {
     }
 
     pub fn gen_clip(&self) -> Option<Rect> {
-        if self.m_type == EType::Player {
-            let n_x : i32 = match self.anim {
-                Some(ref a) => {
-                    a.g_key() as i32 * 32
-                },
-                None => {0},
-            };
-
-            Some(Rect::new(n_x, // test
-                           if self.dir == 0 {
-                               0
-                           } else if self.dir == -1 {
-                               64
-                           } else {
-                               64 * 2
-                           },
-                           32,
-                           64))
-        } else if self.m_type == EType::Shuriken {
-            Some(Rect::new(if self.x % 2 == 0 { 0 } else { 16 }, 0, self.w, self.h))
-        } else {
-            Some(Rect::new(0, 0, self.w, self.h))
+        match self.anim {
+            Some(ref a) => Some(a.r),
+            None => Some(Rect::new(0, 0, self.w, self.h)),
         }
     }
 
     pub fn anim_next(&mut self) {
-        match self.anim {
-            Some(ref mut a) => {
-                a.next_frame();
-            },
-            None => {},
+
+        match self.m_type {
+            EType::Player => {
+                let ref mut a = self.anim.as_mut().unwrap();
+
+                if self.dir == -1 {
+                    a.next_frame("move_left".to_owned());
+                } else {
+                    a.next_frame("move_right".to_owned());
+                }
+            }
+            EType::Shuriken => {
+                let ref mut a = self.anim.as_mut().unwrap();
+                a.next_frame("spin".to_owned());
+            }
+            _ => {}
+
         }
     }
 
@@ -143,9 +152,9 @@ impl<'a> Entity<'a> {
         }
 
         // debug
-        // r.set_draw_color(Color::RGB(0, 0, 255));
-        // r.draw_rect(self.get_rect())
-        // .expect("fill_rect failed");
+        r.set_draw_color(Color::RGB(0, 0, 255));
+        r.draw_rect(self.get_rect())
+            .expect("fill_rect failed");
     }
 
     pub fn is_offscreen(&self) -> bool {

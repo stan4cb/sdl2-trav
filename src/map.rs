@@ -28,19 +28,40 @@ impl<'a> Map<'a> {
         }
     }
 
-    pub fn draw(&self,r: &mut Renderer) {
+    pub fn draw(&self, r: &mut Renderer) {
         for i in self.items.as_slice() {
             i.draw(r);
         }
     }
 
-    pub fn update(&mut self, event_pump: &EventPump) {
+    pub fn update(&mut self, event_pump: &EventPump) { // placing needs debug
         // add block
         if event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Left) && self.can_place {
-            let t_block = Entity::block(&self.img_s,
-                                        event_pump.mouse_state().x(),
-                                        event_pump.mouse_state().y());
-            self.items.push(t_block);
+            let mut x = event_pump.mouse_state().x();
+            let mut y = event_pump.mouse_state().y();
+
+            let re = x % 32;
+            if re != 0 {
+                if x - re > 16 {
+                    x = x - re;
+                } else {
+                    x = x + re;
+                }
+            }
+            let re = y % 32;
+            if re != 0 {
+                if y - re > 16 {
+                    y = y - re;
+                } else {
+                    y = y + re;
+                }
+            }
+
+            if let None = self.intersect( &Rect::new(x - 16,y - 16,32,32)) {
+                        let t_block = Entity::block(&self.img_s, x, y);
+                        self.items.push(t_block);
+            }
+
             self.can_place = false;
         } else if !event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Left) {
             self.can_place = true;

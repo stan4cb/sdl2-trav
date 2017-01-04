@@ -11,14 +11,14 @@ pub struct Player<'a> {
     pub is_grounded: bool,
 }
 
-impl <'a> Player<'a>{
-    pub fn new(img_src: &ImageS , x: i32, y: i32 ) ->  Player {
+impl<'a> Player<'a> {
+    pub fn new(img_src: &ImageS, x: i32, y: i32) -> Player {
         Player {
-            ent : Entity::player(img_src, x, y),
+            ent: Entity::player(img_src, x, y),
             left: false,
             right: false,
             is_jumping: false,
-            is_grounded: false
+            is_grounded: false,
         }
     }
 }

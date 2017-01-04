@@ -6,6 +6,7 @@ use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::image::{INIT_PNG, INIT_JPG};
+use sdl2::rect::Rect;
 
 pub const SCREEN_WIDTH: u32 = 800;
 pub const SCREEN_HEIGHT: u32 = 600;
@@ -83,13 +84,16 @@ pub fn main() {
                 Event::KeyUp { keycode: Some(Keycode::Right), .. } => player.right = false,
                 Event::KeyUp { keycode: Some(Keycode::Z), .. } => {
                     if player.ent.dir != 0 {
-                        let t_shir = Entity::shuriken(&img_assets,
-                                                      player.ent.x +
-                                                      (player.ent.dir as i32 * (16 + 8 + 1)),
-                                                      player.ent.y,
-                                                      player.ent.dir);
+                        let x = player.ent.x + (player.ent.dir as i32 * (16 + 8 + 1));
 
-                        shir.push(t_shir);
+                        if let Some(_) = world.intersect(&Rect::new(x, player.ent.y,16,16)) {
+                        } else {
+                            let t_shir =
+                                Entity::shuriken(&img_assets, x, player.ent.y, player.ent.dir);
+
+                            shir.push(t_shir);
+                        }
+
                     }
                 }
                 _ => {}
@@ -113,9 +117,8 @@ pub fn main() {
                 player.ent.x = val.right() + 16;
             } else {
                 player.ent.x -= speed;
+                player.ent.anim_next();
             }
-
-            player.ent.anim_next();
         } else if player.left {
             player.ent.x = 16;
         }
@@ -126,13 +129,13 @@ pub fn main() {
                 player.ent.x = val.left() - 16;
             } else {
                 player.ent.x += speed;
+                player.ent.anim_next();
             }
-            player.ent.anim_next();
         } else if player.right {
             player.ent.x = 800 - 16;
         }
 
-        if player.ent.y < 600 - player.ent.h as i32 / 2 && !player.is_jumping {
+        if player.ent.y < 600 - 32 && !player.is_jumping {
             if let Some(val) = world.intersect(&player.ent.trans_rect(0, gravity)) {
                 player.ent.y = val.top() - 32;
                 player.is_grounded = true;
@@ -181,9 +184,11 @@ pub fn main() {
                         };
                     } else {
                         val.x += s_speed;
+                        val.anim_next();
                     }
                 } else {
                     val.x += s_speed;
+                    val.anim_next();
                 }
             } else {
                 remove.push(i as usize);
