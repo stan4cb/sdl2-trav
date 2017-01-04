@@ -23,7 +23,6 @@ use entity::Entity;
 use player::Player;
 
 pub fn main() {
-
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
