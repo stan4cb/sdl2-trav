@@ -3,7 +3,6 @@ use std::io::{Write, Read};
 
 use sdl2::EventPump;
 use sdl2::mouse::MouseButton;
-use sdl2::render::Renderer;
 
 use sdl2::rect::{Rect, Point};
 
@@ -25,12 +24,6 @@ impl<'a> Map<'a> {
             img_s: img,
             can_place: true,
             can_remove: true,
-        }
-    }
-
-    pub fn draw(&self, r: &mut Renderer) {
-        for i in self.items.as_slice() {
-            i.draw(r);
         }
     }
 

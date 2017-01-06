@@ -1,6 +1,5 @@
-use sdl2::render::{Renderer, Texture};
+use sdl2::render::Texture;
 use sdl2::rect::Rect;
-use sdl2::pixels::Color;
 
 use std::path::Path;
 
@@ -24,7 +23,7 @@ pub struct Entity<'a> {
     pub w: u32,
     pub h: u32,
     pub dir: i8,
-    img: Option<&'a Texture>,
+    pub img: Option<&'a Texture>,
 
     pub anim: Option<Anim>,
 }
@@ -82,7 +81,7 @@ impl<'a> Entity<'a> {
         }
     }
 
-    pub fn gen_clip(&self) -> Option<Rect> {
+    pub fn anim_frame(&self) -> Option<Rect> {
         match self.anim {
             Some(ref a) => Some(a.r),
             None => Some(Rect::new(0, 0, self.w, self.h)),
@@ -123,27 +122,6 @@ impl<'a> Entity<'a> {
                   (self.y + y) - (self.h / 2) as i32,
                   self.w,
                   self.h)
-    }
-
-    pub fn draw(&self, r: &mut Renderer) {
-        match self.img {
-            Some(ref img) => {
-                r.copy(img,
-                          self.gen_clip(), /* if self.clip == None {
-                                            * self.gen_clip()
-                                            * } else {
-                                            * self.clip
-                                            * } */
-                          Some(self.get_rect()))
-                    .expect("render failed");
-            }
-            None => {}
-        }
-
-        // debug
-        r.set_draw_color(Color::RGB(0, 0, 255));
-        r.draw_rect(self.get_rect())
-            .expect("fill_rect failed");
     }
 
     pub fn is_offscreen(&self) -> bool {

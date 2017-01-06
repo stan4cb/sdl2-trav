@@ -16,11 +16,14 @@ pub mod entity;
 pub mod assets;
 pub mod player;
 pub mod anim;
+pub mod render;
 
 use map::Map;
 use assets::ImageS;
 use entity::Entity;
 use player::Player;
+
+use render::Renderable;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -51,6 +54,7 @@ pub fn main() {
     world.load_map();
 
     let mut player = Player::new(&img_assets, SCREEN_WIDTH as i32 / 2, 0);
+    player.ent.anim_next();
 
     let mut jump_buffer = 0_i32; // move it to player
 
@@ -61,7 +65,7 @@ pub fn main() {
     let mut shir: Vec<Entity> = vec![];
 
     'running: loop {
-        renderer.set_draw_color(Color::RGB(100, 100, 100));
+        renderer.set_draw_color(Color::RGB(25, 25, 25));
         renderer.clear();
 
         for event in event_pump.poll_iter() {
@@ -92,7 +96,6 @@ pub fn main() {
 
                             shir.push(t_shir);
                         }
-
                     }
                 }
                 _ => {}
@@ -165,8 +168,7 @@ pub fn main() {
             player.is_grounded = true; // nes?
         }
 
-        world.draw(&mut renderer);
-        player.ent.draw(&mut renderer);
+        render::draw_all(&mut renderer,&[&world, &player]);
 
         let mut remove: Vec<usize> = vec![];
         for i in 0..shir.len() {
@@ -180,7 +182,7 @@ pub fn main() {
                         remove.push(i as usize);
                     }
                     // should stick to the block?
-                    if ret.height() > 6 {
+                    if true { //ret.height() > 6
                         val.x = if val.dir == 1 {
                             ret.left() - 8
                         } else {
