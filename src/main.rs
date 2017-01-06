@@ -23,8 +23,6 @@ use assets::ImageS;
 use entity::Entity;
 use player::Player;
 
-use render::Renderable;
-
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -65,9 +63,6 @@ pub fn main() {
     let mut shir: Vec<Entity> = vec![];
 
     'running: loop {
-        renderer.set_draw_color(Color::RGB(25, 25, 25));
-        renderer.clear();
-
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } |
@@ -89,7 +84,7 @@ pub fn main() {
                     if player.ent.dir != 0 {
                         let x = player.ent.x + (player.ent.dir as i32 * (16 + 8 + 1));
 
-                        if let Some(_) = world.intersect(&Rect::new(x, player.ent.y,16,16)) {
+                        if let Some(_) = world.intersect(&Rect::new(x, player.ent.y, 16, 16)) {
                         } else {
                             let t_shir =
                                 Entity::shuriken(&img_assets, x, player.ent.y, player.ent.dir);
@@ -138,8 +133,8 @@ pub fn main() {
         }
 
         if !player.left && !player.right {
-            //player.ent.dir = 0;
-            //player.ent.anim_next();
+            // player.ent.dir = 0;
+            // player.ent.anim_next();
         }
 
         if player.ent.y < 600 - 32 && !player.is_jumping {
@@ -168,8 +163,6 @@ pub fn main() {
             player.is_grounded = true; // nes?
         }
 
-        render::draw_all(&mut renderer,&[&world, &player]);
-
         let mut remove: Vec<usize> = vec![];
         for i in 0..shir.len() {
             let ref mut val = shir[i];
@@ -182,7 +175,8 @@ pub fn main() {
                         remove.push(i as usize);
                     }
                     // should stick to the block?
-                    if true { //ret.height() > 6
+                    if true {
+                        // ret.height() > 6
                         val.x = if val.dir == 1 {
                             ret.left() - 8
                         } else {
@@ -199,13 +193,16 @@ pub fn main() {
             } else {
                 remove.push(i as usize);
             }
-
-            val.draw(&mut renderer);
         }
 
         for i in 0..remove.len() {
             shir.remove(remove[remove.len() - i - 1]);
         }
+        
+        renderer.set_draw_color(Color::RGB(25, 25, 25));
+        renderer.clear();
+
+        render::draw_all(&mut renderer, &[&world, &player, &shir]);
 
         renderer.present();
     }

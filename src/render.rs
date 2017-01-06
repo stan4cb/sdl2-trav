@@ -27,7 +27,6 @@ impl <'a> Renderable for Entity<'a> {
             None => {}
         }
 
-        // debug
         r.set_draw_color(Color::RGB(0, 0, 255));
         r.draw_rect(self.get_rect())
             .expect("fill_rect failed");
@@ -37,6 +36,14 @@ impl <'a> Renderable for Entity<'a> {
 impl <'a> Renderable for Player<'a> {
     fn draw(&self,  r: &mut Renderer) {
         self.ent.draw(r);
+    }
+}
+
+impl <'a> Renderable for Vec<Entity<'a>> {
+    fn draw(&self,  r: &mut Renderer) {
+        for ref i in self {
+            i.draw(r);
+        }
     }
 }
 
