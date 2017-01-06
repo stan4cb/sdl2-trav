@@ -11,14 +11,14 @@ use entity::Entity;
 
 pub struct Map<'a> {
     pub items: Vec<Entity<'a>>,
-    pub img_s: &'a ImageS,
+    pub img_s: &'a Assets,
 
     can_place: bool,
     can_remove: bool,
 }
 
 impl<'a> Map<'a> {
-    pub fn new(img: &'a ImageS) -> Map<'a> {
+    pub fn new(img: &'a Assets) -> Map<'a> {
         Map {
             items: vec![],
             img_s: img,

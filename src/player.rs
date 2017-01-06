@@ -1,5 +1,5 @@
 use Entity;
-use ImageS;
+use Assets;
 
 pub struct Player<'a> {
     pub ent: Entity<'a>,
@@ -12,7 +12,7 @@ pub struct Player<'a> {
 }
 
 impl<'a> Player<'a> {
-    pub fn new(img_src: &ImageS, x: i32, y: i32) -> Player {
+    pub fn new(img_src: &Assets, x: i32, y: i32) -> Player {
         Player {
             ent: Entity::player(img_src, x, y),
             left: false,

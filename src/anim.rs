@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
+#[derive(Clone)]
 pub struct Anim {
     key: usize,
     s_key: String,

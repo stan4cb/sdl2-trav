@@ -19,7 +19,7 @@ pub mod anim;
 pub mod render;
 
 use map::Map;
-use assets::ImageS;
+use assets::Assets;
 use entity::Entity;
 use player::Player;
 
@@ -41,17 +41,21 @@ pub fn main() {
         .unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
 
-    let mut img_assets = ImageS::new();
-    img_assets.load_images(&renderer,
-                           &[("player", &Path::new("assets/player.png")),
-                             ("shuriken", &Path::new("assets/shuriken.png")),
-                             ("block", &Path::new("assets/block.png"))]);
+    let mut m_assets = Assets::new();
 
-    let mut world = Map::new(&img_assets);
+    m_assets.images.load_images(&renderer,
+                                &[("player", &Path::new("assets/player.png")),
+                                  ("shuriken", &Path::new("assets/shuriken.png")),
+                                  ("block", &Path::new("assets/block.png"))]);
+
+    m_assets.animations.load_animations(&[("player", &Path::new("assets/player.anim")),
+                                          ("shuriken", &Path::new("assets/shuriken.anim"))]);
+
+    let mut world = Map::new(&m_assets);
 
     world.load_map();
 
-    let mut player = Player::new(&img_assets, SCREEN_WIDTH as i32 / 2, 0);
+    let mut player = Player::new(&m_assets, SCREEN_WIDTH as i32 / 2, 0);
     player.ent.anim_next();
 
     let mut jump_buffer = 0_i32; // move it to player
@@ -87,7 +91,7 @@ pub fn main() {
                         if let Some(_) = world.intersect(&Rect::new(x, player.ent.y, 16, 16)) {
                         } else {
                             let t_shir =
-                                Entity::shuriken(&img_assets, x, player.ent.y, player.ent.dir);
+                                Entity::shuriken(&m_assets, x, player.ent.y, player.ent.dir);
 
                             shir.push(t_shir);
                         }
@@ -198,7 +202,7 @@ pub fn main() {
         for i in 0..remove.len() {
             shir.remove(remove[remove.len() - i - 1]);
         }
-        
+
         renderer.set_draw_color(Color::RGB(25, 25, 25));
         renderer.clear();
 

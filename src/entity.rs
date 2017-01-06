@@ -1,21 +1,20 @@
 use sdl2::render::Texture;
 use sdl2::rect::Rect;
 
-use std::path::Path;
-
 use assets::*;
 use anim::Anim;
 
 const SCREEN_WIDTH: u32 = 800;
 const SCREEN_HEIGHT: u32 = 600;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum EType {
     Player,
     Shuriken,
     Block,
 }
 
+#[derive(Clone)]
 pub struct Entity<'a> {
     pub m_type: EType,
     pub x: i32,
@@ -42,7 +41,7 @@ impl<'a> Entity<'a> {
         }
     }
 
-    pub fn player(src_img: &ImageS, x: i32, y: i32) -> Entity {
+    pub fn player(assets: &Assets, x: i32, y: i32) -> Entity {
         Entity {
             m_type: EType::Player,
             x: x,
@@ -50,12 +49,12 @@ impl<'a> Entity<'a> {
             w: 32,
             h: 64,
             dir: 0,
-            img: src_img.get_image("player"),
-            anim: Some(Anim::load_from_file(&Path::new("assets/player.anim"))),
+            img: assets.images.get_ref("player"),
+            anim: assets.animations.get_ref("player"),
         }
     }
 
-    pub fn shuriken(src_img: &ImageS, x: i32, y: i32, dir: i8) -> Entity {
+    pub fn shuriken(assets: &Assets, x: i32, y: i32, dir: i8) -> Entity {
         Entity {
             m_type: EType::Shuriken,
             x: x,
@@ -63,12 +62,12 @@ impl<'a> Entity<'a> {
             w: 16,
             h: 16,
             dir: dir,
-            img: src_img.get_image("shuriken"),
-            anim: Some(Anim::load_from_file(&Path::new("assets/shuriken.anim"))),
+            img: assets.images.get_ref("shuriken"),
+            anim: assets.animations.get_ref("shuriken"),
         }
     }
 
-    pub fn block(src_img: &ImageS, x: i32, y: i32) -> Entity {
+    pub fn block(assets: &Assets, x: i32, y: i32) -> Entity {
         Entity {
             m_type: EType::Block,
             x: x,
@@ -76,7 +75,7 @@ impl<'a> Entity<'a> {
             w: 32,
             h: 32,
             dir: 0,
-            img: src_img.get_image("block"),
+            img: assets.images.get_ref("block"),
             anim: None,
         }
     }

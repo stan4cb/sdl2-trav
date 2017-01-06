@@ -12,7 +12,7 @@ pub fn draw_all(target: &mut Renderer, r: &[&Renderable]) {
 }
 
 pub trait Renderable {
-    fn draw(&self, _: &mut Renderer) {}
+    fn draw(&self, _: &mut Renderer);
 }
 
 impl <'a> Renderable for Entity<'a> {
@@ -39,7 +39,7 @@ impl <'a> Renderable for Player<'a> {
     }
 }
 
-impl <'a> Renderable for Vec<Entity<'a>> {
+impl <'a, T: Renderable> Renderable for Vec<T> {
     fn draw(&self,  r: &mut Renderer) {
         for ref i in self {
             i.draw(r);
