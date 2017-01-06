@@ -8,14 +8,12 @@ use sdl2::keyboard::Keycode;
 use sdl2::image::{INIT_PNG, INIT_JPG};
 use sdl2::rect::Rect;
 
-pub const SCREEN_WIDTH: u32 = 800;
-pub const SCREEN_HEIGHT: u32 = 600;
-
 pub mod map;
+pub mod anim;
 pub mod entity;
 pub mod assets;
 pub mod player;
-pub mod anim;
+pub mod library;
 pub mod render;
 
 use map::Map;
@@ -29,7 +27,7 @@ pub fn main() {
 
     let _image_context = sdl2::image::init(INIT_PNG | INIT_JPG).unwrap();
 
-    let window = video_subsystem.window("sdl2-trav", SCREEN_WIDTH, SCREEN_HEIGHT)
+    let window = video_subsystem.window("sdl2-trav", library::SCREEN_WIDTH, library::SCREEN_HEIGHT)
         .position_centered()
         .opengl()
         .build()
@@ -55,7 +53,7 @@ pub fn main() {
 
     world.load_map();
 
-    let mut player = Player::new(&m_assets, SCREEN_WIDTH as i32 / 2, 0);
+    let mut player = Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
     player.ent.anim_next();
 
     let mut jump_buffer = 0_i32; // move it to player

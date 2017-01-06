@@ -2,10 +2,8 @@ use sdl2::render::Texture;
 use sdl2::rect::Rect;
 
 use assets::*;
+use library::*;
 use anim::Anim;
-
-const SCREEN_WIDTH: u32 = 800;
-const SCREEN_HEIGHT: u32 = 600;
 
 #[derive(PartialEq, Clone)]
 pub enum EType {
@@ -49,8 +47,8 @@ impl<'a> Entity<'a> {
             w: 32,
             h: 64,
             dir: 0,
-            img: assets.images.get_ref("player"),
-            anim: assets.animations.get_ref("player"),
+            img: assets.images.get("player"),
+            anim: assets.animations.get("player"),
         }
     }
 
@@ -62,8 +60,8 @@ impl<'a> Entity<'a> {
             w: 16,
             h: 16,
             dir: dir,
-            img: assets.images.get_ref("shuriken"),
-            anim: assets.animations.get_ref("shuriken"),
+            img: assets.images.get("shuriken"),
+            anim: assets.animations.get("shuriken"),
         }
     }
 
@@ -75,7 +73,7 @@ impl<'a> Entity<'a> {
             w: 32,
             h: 32,
             dir: 0,
-            img: assets.images.get_ref("block"),
+            img: assets.images.get("block"),
             anim: None,
         }
     }
