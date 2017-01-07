@@ -1,9 +1,6 @@
 use std::fs::File;
 use std::io::{Write, Read};
 
-use sdl2::EventPump;
-use sdl2::mouse::MouseButton;
-
 use sdl2::rect::{Rect, Point};
 
 use assets::*;

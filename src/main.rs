@@ -6,7 +6,6 @@ use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::image::{INIT_PNG, INIT_JPG};
-use sdl2::rect::Rect;
 
 pub mod map;
 pub mod anim;
@@ -17,13 +16,15 @@ pub mod render;
 pub mod update;
 pub mod events;
 pub mod library;
+pub mod shurikens;
 
-use map::Map;
 use assets::Assets;
 use entity::Entity;
 use player::Player;
 use update::Updateble;
 use events::EventListener;
+
+//use std::rc::Rc;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -53,14 +54,13 @@ pub fn main() {
     m_assets.animations.load_animations(&[("player", &Path::new("assets/player.anim")),
                                           ("shuriken", &Path::new("assets/shuriken.anim"))]);
 
-    let mut world = Map::new(&m_assets);
+    let mut world = map::Map::new(&m_assets);
 
     world.load_map();
 
-    let mut player = Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
+    let mut player = player::Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
+    // player.shurikens.owner = Some( Rc::from(  &player));
     player.ent.anim_next();
-
-    let mut shir: Vec<Entity> = vec![];
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -69,19 +69,6 @@ pub fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     world.save_map();
                     break 'running;
-                }
-                Event::KeyUp { keycode: Some(Keycode::Z), .. } => {
-                    if player.ent.dir != 0 {
-                        let x = player.ent.x + (player.ent.dir as i32 * (16 + 8 + 1));
-
-                        if let Some(_) = world.intersect(&Rect::new(x, player.ent.y, 16, 16)) {
-                        } else {
-                            let t_shir =
-                                Entity::shuriken(&m_assets, x, player.ent.y, player.ent.dir);
-
-                            shir.push(t_shir);
-                        }
-                    }
                 }
                 Event::KeyUp { keycode: Some(key), .. } => player.key_up(key),
                 Event::KeyDown { keycode: Some(key), .. } => player.key_down(key),
@@ -94,45 +81,10 @@ pub fn main() {
         player.update(); // eh
         player.update_with_world(&world);
 
-        let mut remove: Vec<usize> = vec![];
-        for i in 0..shir.len() {
-            let ref mut val = shir[i];
-            if !val.is_offscreen() {
-                let s_speed = (val.dir as i32) * 7;
-
-                if let Some(ret) = world.intersect(&val.trans_rect(s_speed, 0)) {
-                    if let Some(_) = player.ent.get_rect().intersection(val.get_rect()) {
-                        remove.push(i as usize);
-                    }
-                    // should stick to the block?
-                    if true {
-                        // ret.height() > 6
-                        val.x = if val.dir == 1 {
-                            ret.left() - 8
-                        } else {
-                            ret.right() + 8
-                        };
-                    } else {
-                        val.x += s_speed;
-                        val.anim_next();
-                    }
-                } else {
-                    val.x += s_speed;
-                    val.anim_next();
-                }
-            } else {
-                remove.push(i as usize);
-            }
-        }
-
-        for i in 0..remove.len() {
-            shir.remove(remove[remove.len() - i - 1]);
-        }
-
         renderer.set_draw_color(Color::RGB(25, 25, 25));
         renderer.clear();
 
-        render::draw_all(&mut renderer, &[&world, &player, &shir]);
+        render::draw_all(&mut renderer, &[&world, &player.shurikens, &player]);
 
         renderer.present();
     }

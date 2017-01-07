@@ -2,7 +2,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 
 use Player;
-use Map;
+use map::Map;
 use Entity;
 use sdl2::rect::Rect;
 
@@ -37,6 +37,24 @@ impl<'a> EventListener for Player<'a> {
                     self.is_jumping = true;
                     self.jump_buffer = 32 * 3;
                 }
+            }
+            Keycode::Z => {
+                
+                    if self.ent.dir != 0 {
+                        let x = self.ent.x + (self.ent.dir as i32 * (16 + 8 + 1));
+
+                        self.shurikens.throw(self.asset_base, self.ent.dir, x, self.ent.y);
+
+                        /*if let Some(_) = world.intersect(&Rect::new(x, player.ent.y, 16, 16)) {
+                        } else {
+                            let t_shir =
+                                Entity::shuriken(&m_assets, x, self.ent.y, self.ent.dir);
+
+                            // shir.push(t_shir);
+
+                            self.shurikens.items.push(t_shir);
+                        }*/
+                    }
             }
             Keycode::Left => {
                 self.left = true;

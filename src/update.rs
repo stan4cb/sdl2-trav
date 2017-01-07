@@ -1,5 +1,5 @@
 use Player;
-use Map;
+use map::Map;
 
 pub trait Updateble {
     fn update(&mut self);
@@ -68,5 +68,6 @@ impl<'a> Updateble for Player<'a> {
             self.is_grounded = true; // nes?
         }
 
+        self.shurikens.update_with_world(world);
     }
 }

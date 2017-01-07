@@ -1,8 +1,11 @@
 use Entity;
 use Assets;
+use shurikens::Shurukens;
 
 pub struct Player<'a> {
+    pub asset_base: &'a Assets,
     pub ent: Entity<'a>,
+    pub shurikens: Shurukens<'a>,
 
     pub left: bool,
     pub right: bool,
@@ -20,7 +23,9 @@ pub struct Player<'a> {
 impl<'a> Player<'a> {
     pub fn new(img_src: &Assets, x: i32, y: i32) -> Player {
         Player {
+            asset_base: img_src,
             ent: Entity::player(img_src, x, y),
+            shurikens: Shurukens::new(),
             left: false,
             right: false,
             is_jumping: false,
