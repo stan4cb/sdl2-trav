@@ -13,13 +13,17 @@ pub mod anim;
 pub mod entity;
 pub mod assets;
 pub mod player;
-pub mod library;
 pub mod render;
+pub mod update;
+pub mod events;
+pub mod library;
 
 use map::Map;
 use assets::Assets;
 use entity::Entity;
 use player::Player;
+use update::Updateble;
+use events::EventListener;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -56,12 +60,6 @@ pub fn main() {
     let mut player = Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
     player.ent.anim_next();
 
-    let mut jump_buffer = 0_i32; // move it to player
-
-    let speed = 6;
-    let gravity = 5;
-    let jump_speed = 8;
-
     let mut shir: Vec<Entity> = vec![];
 
     'running: loop {
@@ -72,16 +70,6 @@ pub fn main() {
                     world.save_map();
                     break 'running;
                 }
-                Event::KeyDown { keycode: Some(Keycode::Space), .. } => {
-                    if !player.is_jumping && player.is_grounded {
-                        player.is_jumping = true;
-                        jump_buffer = 32 * 3;
-                    }
-                }
-                Event::KeyDown { keycode: Some(Keycode::Left), .. } => player.left = true,
-                Event::KeyDown { keycode: Some(Keycode::Right), .. } => player.right = true,
-                Event::KeyUp { keycode: Some(Keycode::Left), .. } => player.left = false,
-                Event::KeyUp { keycode: Some(Keycode::Right), .. } => player.right = false,
                 Event::KeyUp { keycode: Some(Keycode::Z), .. } => {
                     if player.ent.dir != 0 {
                         let x = player.ent.x + (player.ent.dir as i32 * (16 + 8 + 1));
@@ -95,80 +83,20 @@ pub fn main() {
                         }
                     }
                 }
+                Event::KeyUp { keycode: Some(key), .. } => player.key_up(key),
+                Event::KeyDown { keycode: Some(key), .. } => player.key_down(key),
+                Event::MouseButtonUp { mouse_btn, x, y, .. } => world.mouse_up(mouse_btn, x, y),
+                Event::MouseButtonDown { mouse_btn, x, y, .. } => world.mouse_down(mouse_btn, x, y),
                 _ => {}
             }
         }
 
-        world.update(&event_pump);
-
-        // face direction, allows throwing
-        player.ent.dir = if player.left {
-            -1
-        } else if player.right {
-            1
-        } else {
-            player.ent.dir
-        };
-
-        // border left
-        if player.left && player.ent.x > 16 {
-            if let Some(val) = world.intersect(&player.ent.trans_rect(-speed, 0)) {
-                player.ent.x = val.right() + 16;
-            } else {
-                player.ent.x -= speed;
-                player.ent.anim_next();
-            }
-        } else if player.left {
-            player.ent.x = 16;
-        }
-
-        // border right
-        if player.right && player.ent.x < 800 - 16 {
-            if let Some(val) = world.intersect(&player.ent.trans_rect(speed, 0)) {
-                player.ent.x = val.left() - 16;
-            } else {
-                player.ent.x += speed;
-                player.ent.anim_next();
-            }
-        } else if player.right {
-            player.ent.x = 800 - 16;
-        }
-
-        if !player.left && !player.right {
-            // player.ent.dir = 0;
-            // player.ent.anim_next();
-        }
-
-        if player.ent.y < 600 - 32 && !player.is_jumping {
-            if let Some(val) = world.intersect(&player.ent.trans_rect(0, gravity)) {
-                player.ent.y = val.top() - 32;
-                player.is_grounded = true;
-            } else {
-                player.ent.y += gravity;
-                player.is_grounded = false;
-            }
-
-        } else if jump_buffer > 0 {
-            jump_buffer -= jump_speed;
-
-            if let Some(val) = world.intersect(&player.ent.trans_rect(0, -jump_speed)) {
-                player.ent.y = val.bottom() + 32;
-                jump_buffer = 0;
-                player.is_jumping = false;
-            } else {
-                player.ent.y -= jump_speed;
-            }
-
-
-        } else {
-            player.is_jumping = false;
-            player.is_grounded = true; // nes?
-        }
+        player.update(); // eh
+        player.update_with_world(&world);
 
         let mut remove: Vec<usize> = vec![];
         for i in 0..shir.len() {
             let ref mut val = shir[i];
-            // val.x > -8 && val.x < 800 + 8
             if !val.is_offscreen() {
                 let s_speed = (val.dir as i32) * 7;
 

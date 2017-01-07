@@ -13,8 +13,8 @@ pub struct Map<'a> {
     pub items: Vec<Entity<'a>>,
     pub img_s: &'a Assets,
 
-    can_place: bool,
-    can_remove: bool,
+    pub can_place: bool,
+    pub can_remove: bool,
 }
 
 impl<'a> Map<'a> {
@@ -24,53 +24,6 @@ impl<'a> Map<'a> {
             img_s: img,
             can_place: true,
             can_remove: true,
-        }
-    }
-
-    pub fn update(&mut self, event_pump: &EventPump) {
-        // placing needs debug
-        // add block
-        if event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Left) && self.can_place {
-            let mut x = event_pump.mouse_state().x();
-            let mut y = event_pump.mouse_state().y();
-
-            let re = x % 32;
-            if re != 0 {
-                if x - re > 16 {
-                    x = x - re;
-                } else {
-                    x = x + re;
-                }
-            }
-            let re = y % 32;
-            if re != 0 {
-                if y - re > 16 {
-                    y = y - re;
-                } else {
-                    y = y + re;
-                }
-            }
-
-            if let None = self.intersect(&Rect::new(x - 16, y - 16, 32, 32)) {
-                let t_block = Entity::block(&self.img_s, x, y);
-                self.items.push(t_block);
-            }
-
-            self.can_place = false;
-        } else if !event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Left) {
-            self.can_place = true;
-        }
-
-        // remove block
-        if event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Right) && self.can_remove {
-            if let Some(id) =
-                self.clicked(event_pump.mouse_state().x(), event_pump.mouse_state().y()) {
-                self.items.remove(id);
-            }
-
-            self.can_remove = false;
-        } else if !event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Right) {
-            self.can_remove = true;
         }
     }
 
@@ -85,7 +38,6 @@ impl<'a> Map<'a> {
     }
 
     pub fn clicked(&self, x: i32, y: i32) -> Option<usize> {
-
         for i in 0..self.items.len() {
             let ref item = self.items[i];
 
