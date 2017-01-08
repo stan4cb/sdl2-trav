@@ -34,6 +34,7 @@ impl Anim {
 
     pub fn load_from_file(p: &Path) -> Anim {
         let mut t_anim = Anim::new_empty();
+        let mut first_anim = false;
 
         match File::open(p) {
             Err(_) => panic!("failed to read {:?}", p),
@@ -63,7 +64,14 @@ impl Anim {
                             let y = pos[1].parse::<i32>().unwrap();
                             let w = pos[2].parse::<i32>().unwrap();
                             let h = pos[3].parse::<i32>().unwrap();
-                            r_pos.push(Rect::new(x, y, w as u32, h as u32));
+
+                            let r = Rect::new(x, y, w as u32, h as u32);
+                            r_pos.push(r);
+
+                            if !first_anim {
+                                t_anim.r = r;
+                                first_anim = true;
+                            }
                         }
                     }
                 }

@@ -2,12 +2,12 @@ extern crate sdl2;
 
 use std::path::Path;
 
-use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::image::{INIT_PNG, INIT_JPG};
 
 pub mod map;
+pub mod time;
 pub mod anim;
 pub mod entity;
 pub mod assets;
@@ -19,29 +19,26 @@ pub mod library;
 pub mod shurikens;
 
 use assets::Assets;
-use entity::Entity;
-use player::Player;
 use update::Updateble;
 use events::EventListener;
 
-//use std::rc::Rc;
-
 pub fn main() {
-    let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
+    let sdl_context = sdl2::init().expect("sdl2 init");
+    let video_subsystem = sdl_context.video().expect("video init");
 
-    let _image_context = sdl2::image::init(INIT_PNG | INIT_JPG).unwrap();
+    let _image_context = sdl2::image::init(INIT_PNG | INIT_JPG).expect("sdl2_image init");
 
     let window = video_subsystem.window("sdl2-trav", library::SCREEN_WIDTH, library::SCREEN_HEIGHT)
         .position_centered()
         .opengl()
         .build()
-        .unwrap();
+        .expect("window init");
 
     let mut renderer = window.renderer()
         .present_vsync()
         .build()
         .unwrap();
+
     let mut event_pump = sdl_context.event_pump().unwrap();
 
     let mut m_assets = Assets::new();
@@ -59,9 +56,8 @@ pub fn main() {
     world.load_map();
 
     let mut player = player::Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
-    // player.shurikens.owner = Some( Rc::from(  &player));
-    player.ent.anim_next();
 
+    let mut timer = time::Timer::new();
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -78,14 +74,10 @@ pub fn main() {
             }
         }
 
-        player.update(); // eh
-        player.update_with_world(&world);
-
-        renderer.set_draw_color(Color::RGB(25, 25, 25));
-        renderer.clear();
+        player.update_with(&world);
 
         render::draw_all(&mut renderer, &[&world, &player.shurikens, &player]);
 
-        renderer.present();
+        timer.update();
     }
 }

@@ -1,49 +1,35 @@
-use Entity;
 use map::Map;
-use update::Updateble;
-use render::Renderable;
+use entity::Entity;
 use assets::Assets;
-use player::Player;
 
+use render::Renderable;
+
+use sdl2::rect::Rect;
 use sdl2::render::Renderer;
-use std::rc::Rc;
 
 pub struct Shurukens<'a> {
     pub items: Vec<Entity<'a>>,
-    pub owner: Option<Rc<&'a Player<'a>>>,
     max: usize,
 }
 
 impl<'a> Shurukens<'a> {
     pub fn new() -> Shurukens<'a> {
         Shurukens {
-            owner: None,
             items: vec![],
             max: 5,
         }
     }
 
     pub fn throw(&mut self, assets: &'a Assets, dir: i8, x: i32, y: i32) {
-        if self.items.len() < self.max {
+        if self.items.len() < self.max
+        {
             let t_shir = Entity::shuriken(assets, x, y, dir);
 
             self.items.push(t_shir);
         }
     }
-}
 
-impl<'a> Renderable for Shurukens<'a> {
-    fn draw(&self, r: &mut Renderer) {
-        for ref i in self.items.as_slice() {
-            i.draw(r);
-        }
-    }
-}
-
-impl<'a> Updateble for Shurukens<'a> {
-    fn update(&mut self) {}
-
-    fn update_with_world(&mut self, world: &Map) {
+    pub fn update_(&mut self, world: &Map, player: Rect) {
         let mut remove: Vec<usize> = vec![];
         for i in 0..self.items.len() {
             let ref mut val = self.items[i];
@@ -53,9 +39,9 @@ impl<'a> Updateble for Shurukens<'a> {
                 if let Some(ret) = world.intersect(&val.trans_rect(s_speed, 0)) {
                     // find a way to access Player
 
-                    // if let Some(_) = player.ent.get_rect().intersection(val.get_rect()) {
-                    // remove.push(i as usize);
-                    // }
+                    if let Some(_) = player.intersection(val.get_rect()) {
+                     remove.push(i as usize);
+                    }
 
                     // should stick to the block?
                     if true {
@@ -80,6 +66,14 @@ impl<'a> Updateble for Shurukens<'a> {
 
         for i in 0..remove.len() {
             self.items.remove(remove[remove.len() - i - 1]);
+        }
+    }
+}
+
+impl<'a> Renderable for Shurukens<'a> {
+    fn draw(&self, r: &mut Renderer) {
+        for ref i in self.items.as_slice() {
+            i.draw(r);
         }
     }
 }

@@ -1,9 +1,12 @@
-use sdl2::render::Texture;
 use sdl2::rect::Rect;
 
 use assets::*;
 use library::*;
 use anim::Anim;
+
+use render::Renderable;
+use sdl2::pixels::Color;
+use sdl2::render::{Texture, Renderer};
 
 #[derive(PartialEq, Clone)]
 pub enum EType {
@@ -129,5 +132,21 @@ impl<'a> Entity<'a> {
         } else {
             true
         };
+    }
+}
+
+impl<'a> Renderable for Entity<'a> {
+    fn draw(&self, r: &mut Renderer) {
+        match self.img {
+            Some(ref img) => {
+                r.copy(img, self.anim_frame(), Some(self.get_rect()))
+                    .expect("render failed");
+            }
+            None => {}
+        }
+
+        r.set_draw_color(Color::RGB(0, 0, 255));
+        r.draw_rect(self.get_rect())
+            .expect("fill_rect failed");
     }
 }
