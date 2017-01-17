@@ -18,15 +18,17 @@ pub struct Map<'a> {
 
     pub can_place: bool,
     pub can_remove: bool,
+    pub bits: i32,
 }
 
 impl<'a> Map<'a> {
-    pub fn new(img: &'a Assets) -> Map<'a> {
+    pub fn new(img: &'a Assets, b: i32) -> Map<'a> {
         Map {
             items: vec![],
             img_s: img,
             can_place: true,
             can_remove: true,
+            bits: b,
         }
     }
 
@@ -58,7 +60,7 @@ impl<'a> Map<'a> {
             Err(_) => panic!("failed create map.data"),
             Ok(mut file) => {
                 for m_item in self.items.as_slice() {
-                    file.write(format!("{:?}:{:?}\n", m_item.x, m_item.y).into_bytes().as_slice())
+                    file.write(m_item.to_string().into_bytes().as_slice())
                         .unwrap();
                 }
             }
@@ -67,7 +69,7 @@ impl<'a> Map<'a> {
 
     pub fn load_map(&mut self) {
         match File::open("map.data") {
-            Err(_) => {},
+            Err(_) => {}
             Ok(mut file) => {
                 let mut r_str = String::new();
 
@@ -77,14 +79,18 @@ impl<'a> Map<'a> {
                     let pos: Vec<&str> = val.split(':').collect();
 
                     if pos.len() > 1 {
-                        let m_item = Entity::block(self.img_s,
-                                                   pos[0].parse::<i32>().unwrap(),
-                                                   pos[1].parse::<i32>().unwrap());
-                        self.items.push(m_item);
+                        let mut b_type = String::from("block");
 
                         if pos.len() > 2 {
-                            println!("{:?}", pos[2]); // block type
+                            b_type = String::from(pos[2]);
                         }
+
+                        let m_item = Entity::map_item(self.img_s,
+                                                      b_type,
+                                                      pos[0].parse::<i32>().unwrap(),
+                                                      pos[1].parse::<i32>().unwrap());
+
+                        self.items.push(m_item);
                     }
                 }
             }
@@ -110,32 +116,36 @@ impl<'a> EventListener for Map<'a> {
     }
 
     fn mouse_down(&mut self, btn: MouseButton, x: i32, y: i32) {
+        let div = self.bits;
+        let half = self.bits / 2;
         match btn {
             MouseButton::Left => {
                 if self.can_place {
                     let mut x = x;
                     let mut y = y;
 
-                    // this is broken
-                    let re = x % 32;
+                    let re = x % div;
                     if re != 0 {
-                        if x - re > 16 {
-                            x = x - re;
+                        if re > half {
+                            x = (x / div + 1) * div;
                         } else {
-                            x = x + re;
+                            x = (x / div) * div;
                         }
                     }
-                    let re = y % 32;
+                    let re = y % div;
                     if re != 0 {
-                        if y - re > 16 {
-                            y = y - re;
+                        if re > half {
+                            y = (y / div + 1) * div;
                         } else {
-                            y = y + re;
+                            y = (y / div) * div;
                         }
                     }
 
-                    if let None = self.intersect(&Rect::new(x - 16, y - 16, 32, 32)) {
-                        let t_block = Entity::block(&self.img_s, x, y);
+                    if let None = self.intersect(&Rect::new(x - half,
+                                                            y - half,
+                                                            self.bits as u32,
+                                                            self.bits as u32)) {
+                        let t_block = Entity::map_item(&self.img_s, "OB_Blue".to_owned(), x, y);
                         self.items.push(t_block);
                     }
                 }

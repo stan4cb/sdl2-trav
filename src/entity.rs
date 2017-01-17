@@ -8,11 +8,25 @@ use render::Renderable;
 use sdl2::pixels::Color;
 use sdl2::render::{Texture, Renderer};
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum EType {
     Player,
     Shuriken,
     Block,
+    OB_Blue,
+}
+
+impl EType {
+    pub fn from_string(s: &str) -> Option<EType> {
+        match s {
+            "Block" => Some(EType::Block),
+            "Player" => Some(EType::Player),
+            "Shuriken" => Some(EType::Shuriken),
+            "OB_Blue" => Some(EType::OB_Blue),
+
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -29,6 +43,10 @@ pub struct Entity<'a> {
 }
 
 impl<'a> Entity<'a> {
+    pub fn to_string(&self) -> String {
+        format!("{:?}:{:?}:{:?}\n", self.x, self.y, self.m_type)
+    }
+
     pub fn place_holder(t: EType, img: Option<&Texture>, x: i32, y: i32, w: u32, h: u32) -> Entity {
         Entity {
             m_type: t,
@@ -50,8 +68,8 @@ impl<'a> Entity<'a> {
             w: 32,
             h: 64,
             dir: 0,
-            img: assets.images.get("player"),
-            anim: assets.animations.get("player"),
+            img: assets.images.get("Player"),
+            anim: assets.animations.get("Player"),
         }
     }
 
@@ -63,8 +81,8 @@ impl<'a> Entity<'a> {
             w: 16,
             h: 16,
             dir: dir,
-            img: assets.images.get("shuriken"),
-            anim: assets.animations.get("shuriken"),
+            img: assets.images.get("Shuriken"),
+            anim: assets.animations.get("Shuriken"),
         }
     }
 
@@ -76,10 +94,25 @@ impl<'a> Entity<'a> {
             w: 32,
             h: 32,
             dir: 0,
-            img: assets.images.get("block"),
+            img: assets.images.get("Block"),
             anim: None,
         }
     }
+
+    pub fn map_item(_: &Assets, nm: String, x: i32, y: i32) -> Entity {
+        Entity {
+            m_type: EType::from_string(nm.as_ref()).unwrap(),
+            x: x,
+            y: y,
+            w: 12,
+            h: 12,
+            dir: 0,
+            img: None, // assets.images.get(nm.as_ref()),
+            anim: None,
+        }
+    }
+
+
 
     pub fn anim_frame(&self) -> Option<Rect> {
         match self.anim {
@@ -142,10 +175,12 @@ impl<'a> Renderable for Entity<'a> {
                 r.copy(img, self.anim_frame(), Some(self.get_rect()))
                     .expect("render failed");
             }
-            None => {}
+            None => {
+                // r.set_draw_color(Color::RGB(0,255,0));
+            }
         }
 
-        r.set_draw_color(Color::RGB(0, 0, 255));
+        r.set_draw_color(Color::RGB(255, 0, 0));
         r.draw_rect(self.get_rect())
             .expect("fill_rect failed");
     }

@@ -19,8 +19,9 @@ pub mod library;
 pub mod shurikens;
 
 use assets::Assets;
-use update::Updateble;
 use events::EventListener;
+use entity::Entity;
+use library::Library;
 
 pub fn main() {
     let sdl_context = sdl2::init().expect("sdl2 init");
@@ -44,18 +45,26 @@ pub fn main() {
     let mut m_assets = Assets::new();
 
     m_assets.images.load_images(&renderer,
-                                &[("player", &Path::new("assets/player.png")),
-                                  ("shuriken", &Path::new("assets/shuriken.png")),
-                                  ("block", &Path::new("assets/block.png"))]);
+                                &[("BG", &Path::new("assets/bg.png")),
+                                  ("Player", &Path::new("assets/player.png")),
+                                  ("Shuriken", &Path::new("assets/shuriken.png")),
+                                  ("OB_Blue", &Path::new("assets/blue.png")),
+                                  ("Block", &Path::new("assets/block.png"))]);
 
-    m_assets.animations.load_animations(&[("player", &Path::new("assets/player.anim")),
-                                          ("shuriken", &Path::new("assets/shuriken.anim"))]);
+    m_assets.animations.load_animations(&[("Player", &Path::new("assets/player.anim")),
+                                          ("Shuriken", &Path::new("assets/shuriken.anim"))]);
 
-    let mut world = map::Map::new(&m_assets);
+    let mut world = map::Map::new(&m_assets, 16);
 
     world.load_map();
+    let bg = Entity::place_holder(entity::EType::Block,
+                                  m_assets.images.get("_"),
+                                  1280 / 2,
+                                  720 / 2,
+                                  1280,
+                                  720);
 
-    //let mut player = player::Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
+    // let mut player = player::Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
 
     let mut timer = time::Timer::new();
     'running: loop {
@@ -74,7 +83,7 @@ pub fn main() {
             }
         }
 
-        render::draw_all(&mut renderer, &[&world]);
+        render::draw_all(&mut renderer, &[&bg, &world]);
 
         timer.update();
     }

@@ -3,8 +3,8 @@ use sdl2::render::Texture;
 use assets::*;
 use anim::Anim;
 
-pub const SCREEN_WIDTH: u32 = 1024;
-pub const SCREEN_HEIGHT: u32 = 768;
+pub const SCREEN_WIDTH: u32 = 1280;
+pub const SCREEN_HEIGHT: u32 = 720;
 
 pub trait Library<'a, T, OptionT> {
     fn add(&mut self, _: &str, _: T);
