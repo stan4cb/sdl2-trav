@@ -55,7 +55,7 @@ pub fn main() {
 
     world.load_map();
 
-    let mut player = player::Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
+    //let mut player = player::Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
 
     let mut timer = time::Timer::new();
     'running: loop {
@@ -65,18 +65,16 @@ pub fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     world.save_map();
                     break 'running;
-                }
+                }/*
                 Event::KeyUp { keycode: Some(key), .. } => player.key_up(key),
-                Event::KeyDown { keycode: Some(key), .. } => player.key_down(key),
+                Event::KeyDown { keycode: Some(key), .. } => player.key_down(key),*/
                 Event::MouseButtonUp { mouse_btn, x, y, .. } => world.mouse_up(mouse_btn, x, y),
                 Event::MouseButtonDown { mouse_btn, x, y, .. } => world.mouse_down(mouse_btn, x, y),
                 _ => {}
             }
         }
 
-        player.update_with(&world);
-
-        render::draw_all(&mut renderer, &[&world, &player.shurikens, &player]);
+        render::draw_all(&mut renderer, &[&world]);
 
         timer.update();
     }
