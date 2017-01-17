@@ -67,7 +67,7 @@ impl<'a> Map<'a> {
 
     pub fn load_map(&mut self) {
         match File::open("map.data") {
-            Err(_) => panic!("failed read map.data"),
+            Err(_) => {},
             Ok(mut file) => {
                 let mut r_str = String::new();
 
@@ -149,7 +149,7 @@ impl<'a> EventListener for Map<'a> {
                     self.can_remove = false;
                 }
             }
-            _ => {} 
+            _ => {}
         }
     }
 }
