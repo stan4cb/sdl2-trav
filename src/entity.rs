@@ -181,6 +181,7 @@ impl<'a> Renderable for Entity<'a> {
         }
 
         r.set_draw_color(Color::RGB(255, 0, 0));
+
         r.draw_rect(self.get_rect())
             .expect("fill_rect failed");
     }

@@ -1,9 +1,13 @@
 use sdl2::pixels::Color;
 use sdl2::render::Renderer;
 
-pub fn draw_all(target: &mut Renderer, r: &[&Renderable]) {
+use camera::Camera;
+
+pub fn draw_all(cam: &Camera,target: &mut Renderer, r: &[&Renderable]) {
     target.set_draw_color(Color::RGB(26, 107, 160));
     target.clear();
+
+    target.set_scale(cam.scale, cam.scale).unwrap();
 
     for ref i in r {
         i.draw(target);

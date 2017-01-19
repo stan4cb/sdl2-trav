@@ -3,7 +3,6 @@ extern crate sdl2;
 use std::path::Path;
 
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
 use sdl2::image::{INIT_PNG, INIT_JPG};
 
 pub mod map;
@@ -17,11 +16,14 @@ pub mod update;
 pub mod events;
 pub mod library;
 pub mod shurikens;
+pub mod camera;
 
 use assets::Assets;
-use events::EventListener;
+use events::*;
 use entity::Entity;
 use library::Library;
+
+use camera::*;
 
 pub fn main() {
     let sdl_context = sdl2::init().expect("sdl2 init");
@@ -32,8 +34,14 @@ pub fn main() {
     let window = video_subsystem.window("sdl2-trav", library::SCREEN_WIDTH, library::SCREEN_HEIGHT)
         .position_centered()
         .opengl()
+        .borderless()
         .build()
         .expect("window init");
+        
+    let gl_attr = video_subsystem.gl_attr();
+    gl_attr.set_context_version(3, 2);
+    gl_attr.set_multisample_buffers(1);
+    gl_attr.set_multisample_samples(4);
 
     let mut renderer = window.renderer()
         .present_vsync()
@@ -66,7 +74,11 @@ pub fn main() {
 
     // let mut player = player::Player::new(&m_assets, library::SCREEN_WIDTH as i32 / 2, 0);
 
-    let mut timer = time::Timer::new();
+    let mut cam = Camera::new();
+    let mut ev = Listener::new();
+
+    ev.listeners.push(&mut cam);
+
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -74,17 +86,15 @@ pub fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     world.save_map();
                     break 'running;
-                }/*
-                Event::KeyUp { keycode: Some(key), .. } => player.key_up(key),
-                Event::KeyDown { keycode: Some(key), .. } => player.key_down(key),*/
-                Event::MouseButtonUp { mouse_btn, x, y, .. } => world.mouse_up(mouse_btn, x, y),
-                Event::MouseButtonDown { mouse_btn, x, y, .. } => world.mouse_down(mouse_btn, x, y),
+                }
+                Event::KeyUp { keycode: Some(key), .. } => ev.key_up(key),
+                Event::KeyDown { keycode: Some(key), .. } => ev.key_down(key),
+                Event::MouseButtonUp { mouse_btn, x, y, .. } => ev.mouse_up(mouse_btn, x, y),
+                Event::MouseButtonDown { mouse_btn, x, y, .. } => ev.mouse_down(mouse_btn, x, y),
                 _ => {}
             }
         }
 
-        render::draw_all(&mut renderer, &[&bg, &world]);
-
-        timer.update();
+        render::draw_all(&cam, &mut renderer, &[&bg, &world]);
     }
 }
